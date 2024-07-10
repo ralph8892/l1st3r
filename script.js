@@ -4,7 +4,7 @@ const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
 
-function addItem (e) {
+function onAddItemSubmit (e) {
   e.preventDefault();
 
   const newItem = itemInput.value;
@@ -15,19 +15,47 @@ function addItem (e) {
     return;
   }
 
+  // Create item as DOM element
+  addItemToDOM(newItem);
+
+  // Add item to local storage
+  addItemToStorage(newItem);
+
+  checkUI();
+
+  itemInput.value = '';
+}
+
+function addItemToDOM (item) {
   // Create List Item
   const li = document.createElement('li');
-  li.appendChild(document.createTextNode(newItem));
-  
+  li.appendChild(document.createTextNode(item));
+
   const button = createButton('remove-item btn-link text-red');
   li.appendChild(button);
 
   // Add li to the DOM
   itemList.appendChild(li);
+}
 
-  checkUI();
+function addItemToStorage (item) {
+  // First thing to do is check if there are items on the local storage; initialize a variable to be used in storing the value from local storage (if there are any) which is an array
+  let itemsFromStorage;
 
-  itemInput.value = '';
+  // Check if there are items on local storage
+  if (localStorage.getItem('items') === null) {
+    // Set itemsFromStorage into an empty array if local storage is empty
+    itemsFromStorage = [];
+  } else {
+    // Add items into itemsFromStorage if the local storage has data inside it; since it returns a string you need to parse it to an array 
+    itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+  }
+
+  // Add new item to array
+  itemsFromStorage.push(item);
+
+  // Convert to JSON string and set to local storage
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
 }
 
 function createButton (classes) {
@@ -67,8 +95,9 @@ function filterItems (e) {
   const text = e.target.value.toLowerCase();
 
   items.forEach((item) => {
-    const itemName = item.firstChild.textContent.toLocaleLowerCase();
+    const itemName = item.firstChild.textContent.toLowerCase();
 
+    // if itemName.indexOf(text) matches; value of -1 means the values being compared doesn't match
     if (itemName.indexOf(text) != -1) {
       item.style.display = 'flex';
     } else {
@@ -90,7 +119,7 @@ function checkUI () {
 }
 
 // Event Listeners
-itemForm.addEventListener('submit', addItem);
+itemForm.addEventListener('submit', onAddItemSubmit);
 itemList.addEventListener('click', removeItem);
 clearBtn.addEventListener('click', clearItems);
 itemFilter.addEventListener('input', filterItems);
