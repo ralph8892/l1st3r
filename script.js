@@ -4,6 +4,13 @@ const itemList = document.getElementById('item-list');
 const clearBtn = document.getElementById('clear');
 const itemFilter = document.getElementById('filter');
 
+function displayItems () {
+  const itemsFromStorage = getItemsFromStorage();
+  itemsFromStorage.forEach(item => addItemToDOM(item));
+
+  checkUI();
+}
+
 function onAddItemSubmit (e) {
   e.preventDefault();
 
@@ -38,26 +45,6 @@ function addItemToDOM (item) {
   itemList.appendChild(li);
 }
 
-function addItemToStorage (item) {
-  // First thing to do is check if there are items on the local storage; initialize a variable to be used in storing the value from local storage (if there are any) which is an array
-  let itemsFromStorage;
-
-  // Check if there are items on local storage
-  if (localStorage.getItem('items') === null) {
-    // Set itemsFromStorage into an empty array if local storage is empty
-    itemsFromStorage = [];
-  } else {
-    // Add items into itemsFromStorage if the local storage has data inside it; since it returns a string you need to parse it to an array 
-    itemsFromStorage = JSON.parse(localStorage.getItem('items'));
-  }
-
-  // Add new item to array
-  itemsFromStorage.push(item);
-
-  // Convert to JSON string and set to local storage
-  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
-}
-
 function createButton (classes) {
   const button = document.createElement('button');
   button.className = classes;
@@ -70,6 +57,33 @@ function createIcon (classes) {
   const icon = document.createElement('i');
   icon.className = classes;
   return icon;
+}
+
+function addItemToStorage (item) {
+  // First thing to do is check if there are items on the local storage; initialize a variable to be used in storing the value from local storage (if there are any) which is an array
+  const itemsFromStorage = getItemsFromStorage();
+
+  // Add new item to array
+  itemsFromStorage.push(item);
+
+  // Convert to JSON string and set to local storage
+  localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+}
+
+function getItemsFromStorage () {
+  // First thing to do is check if there are items on the local storage; initialize a variable to be used in storing the value from local storage (if there are any) which is an array
+  let itemsFromStorage;
+
+  // Check if there are items on local storage
+  if (localStorage.getItem('items') === null) {
+    // Set itemsFromStorage into an empty array if local storage is empty
+    itemsFromStorage = [];
+  } else {
+    // Add items into itemsFromStorage if the local storage has data inside it; since it returns a string you need to parse it to an array 
+    itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+  }
+
+  return itemsFromStorage;
 }
 
 function removeItem (e) {
@@ -118,11 +132,16 @@ function checkUI () {
   }
 }
 
-// Event Listeners
-itemForm.addEventListener('submit', onAddItemSubmit);
-itemList.addEventListener('click', removeItem);
-clearBtn.addEventListener('click', clearItems);
-itemFilter.addEventListener('input', filterItems);
+// Initialize app
+function init () {
+  // Event Listeners
+  itemForm.addEventListener('submit', onAddItemSubmit);
+  itemList.addEventListener('click', removeItem);
+  clearBtn.addEventListener('click', clearItems);
+  itemFilter.addEventListener('input', filterItems);
+  document.addEventListener('DOMContentLoaded', displayItems);
 
+  checkUI();
+}
 
-checkUI();
+init();
